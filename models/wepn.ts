@@ -1,21 +1,20 @@
-export enum WepnEffect { DAMAGE = `Damage` };
-export enum WepnTarget { SELF = `Self`, ENEMY = `Enemy` };
-export enum WepnEffectType { INSTANTHIT = `InstantHit`, BULLET = `Bullet`, MISSILE = `Missile`, MINE = `Mine`, SPHEREBURST = `SphereBurst` };
-export enum WepnType { FIXED = `Fixed`, GIMBLE = `Gimble`, ANIMATEDTURRET = `AnimatedTurret` };
+export type WepnEffect = `Damage`;
+export type WepnTarget = `Self` | `Enemy`;
+export type WepnEffectType = `InstantHit` | `Bullet` | `Missile` | `Mine` | `SphereBurst`;
+export type WepnType = `Fixed` | `Gimble` | `AnimatedTurret`;
 
-type TerseWepn = {
-	name: string,
-	effect: WepnEffect,
-	effect_target: WepnTarget,
-	effect_type: WepnEffectType,
-	min_effect: number,
-	max_effect: number,
-	type: WepnType,
-	projectile_speed: number,
-	shots_per_second: number,
-	spawn_effect: string,
+export type WepnSummary = {
+	'Name': string,
+	'Effect': WepnEffect,
+	'Target': WepnTarget,
+	'Effect Type': WepnEffect,
+	'Min Effect': number,
+	'Max Effect': number,
+	'Weapon Type': WepnType,
+	'Projectile Speed': number,
+	'Shots/s': number,
+	'Spawn Effect': WepnEffectType
 };
-export default TerseWepn;
 
 export const calcShotsPerSecond = (wepn_config: { [key: string]: any }): number => {
 	const fire_burst_duration = parseFloat(wepn_config.fire_burst_duration);

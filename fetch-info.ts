@@ -3,9 +3,13 @@ import { URLSearchParams, URL } from 'url';
 
 import logger from './logger';
 import ModelType from './models/model_types';
-import TerseWepn, { calcShotsPerSecond } from './models/wepn';
-import TerseShip from './models/ship';
-import TerseSubs from './models/subs';
+import { WepnSummary, calcShotsPerSecond } from './models/wepn';
+import { ShipSummary } from './models/ship';
+import { SubsSummary, SubsType } from './models/subs';
+
+import * as Glot from './glot-io';
+import { prettyPrintObj } from './formatting';
+import { Flags } from './parsing';
 
 const cleanVal = (val: string | number | undefined) => {
 	if (typeof val === `string`) {
@@ -29,8 +33,8 @@ const cleanVal = (val: string | number | undefined) => {
 	return val;
 };
 
-const tersifyWepnData = (data: {[key: string]: any}): TerseWepn => {
-	return Object.entries({
+const summarizeWepnData = (data: {[key: string]: any}): WepnSummary => {
+	const pretty_wepn = {
 		'Name': data.name,
 		'Effect': data.result.effect,
 		'Target': data.result.target,
@@ -41,14 +45,15 @@ const tersifyWepnData = (data: {[key: string]: any}): TerseWepn => {
 		'Projectile Speed': data.config.projectile_speed,
 		'Shots/s': calcShotsPerSecond(data.config),
 		'Spawn Effect': data.result.spawned_weapon_effect
-	}).reduce<Record<string, string | number>>((acc, [key, val]): {[key: string]: string | number} => {
-		acc[key] = cleanVal(val);
-		return acc;
-	}, {}) as TerseWepn;
+	};
+	for (const [k, v] of Object.entries(pretty_wepn)) {
+		pretty_wepn[k as keyof WepnSummary] = cleanVal(v);
+	}
+	return pretty_wepn;
 };
 
-const tersifyShipData = (data: {[key: string]: any}): TerseShip => {
-	return Object.entries({
+const summarizeShipData = (data: {[key: string]: any}): ShipSummary => {
+	const pretty_ship = {
 		'Name': data.name,
 		'Class': data.attribs.DisplayFamily,
 		'Hitpoints': data.attribs.maxhealth,
@@ -57,41 +62,46 @@ const tersifyShipData = (data: {[key: string]: any}): TerseShip => {
 		'Max Forward Speed': data.attribs.mainEngineMaxSpeed,
 		'Max Strafe Speed': data.attribs.thrusterMaxSpeed,
 		'Armour Type': data.attribs.ArmourFamily,
-	}).reduce<Record<string, string | number>>((acc, [key, val]) => {
-		acc[key] = cleanVal(val);
-		return acc;
-	}, {}) as TerseShip;
+		'Linked Weapons': [],
+	};
+	for (const [k, v] of Object.entries(pretty_ship)) {
+		pretty_ship[k as keyof ShipSummary] = cleanVal(v);
+	}
+	return pretty_ship;
 };
 
-const tersifySubsData = (data: {[key: string]: any}): TerseSubs => {
-	return Object.entries({
+const summarizeSubsData = (data: {[key: string]: any}): SubsSummary => {
+	const pretty_subs = {
 		'Name': data.name,
+		'Type': (data.weapon === null ? `System` : `Weapon`) as SubsType,
 		'Hitpoints': data.attribs.maxhealth,
+		'Regen Time': data.attribs.regentime,
 		'Build Cost': data.attribs.costToBuild,
 		'Build Time': data.attribs.timeToBuild,
-		'Innate': data.attribs.innate || 0,
-		'Visible': data.attribs.visible || 0,
-		'Linked weapon': data.weapon
-	}).reduce<Record<string, string | number>>((acc, [key, val]) => {
-		acc[key] = cleanVal(val);
-		return acc;
-	}, {}) as TerseSubs;
+		'Innate': data.attribs.innate || false,
+		'Visible': data.attribs.visible || false,
+		'Linked Weapon': data.weapon
+	};
+	for (const [k, v] of Object.entries(pretty_subs)) {
+		pretty_subs[k as keyof SubsSummary] = cleanVal(v);
+	}
+	return pretty_subs;
 };
 
-const tersifyData = (data: {[key: string]: any}, type: ModelType): TerseWepn | TerseShip | TerseSubs => {
+const summarizeData = (data: {[key: string]: any}, type: ModelType): WepnSummary | ShipSummary | SubsSummary => {
 	switch (type) {
 		case 'ship':
-			return tersifyShipData(data);
+			return summarizeShipData(data);
 		case 'wepn':
-			return tersifyWepnData(data);
+			return summarizeWepnData(data);
 		case 'subs':
-			return tersifySubsData(data);
+			return summarizeSubsData(data);
 		case `unknown`:
-			return tersifyWepnData(data);
+			return summarizeWepnData(data);
 	}
 };
 
-export default async (arg_pairs: { type: ModelType, name: string, verbose?: boolean }) => {
+export default async (arg_pairs: { type: ModelType, name: string }, flags: Flags) => {
 	try {
 		const url = new URL(process.env.API_LINK!);
 		const params = new URLSearchParams();
@@ -101,24 +111,45 @@ export default async (arg_pairs: { type: ModelType, name: string, verbose?: bool
 		logger.verbose(`Fetching!: ${url.href}`);
 		const res = await fetch(url);
 		const [data, ...others]: {[key: string]: any}[] = (await res.json()).sort((a: any, b: any) => {
-			if (a.name.length < b.name.length) {
+			if (a.name < b.name) {
 				return -1;
-			} else if (a.name.length > b.name.length) {
+			} else if (a.name > b.name) {
 				return 1;
 			}
 			return 0;
 		});
 		if (data) {
 			delete data._id;
-			if (arg_pairs.verbose) {
+			if (flags.all) {
+				const res = await Glot.create({
+					title: `${data.name} (ver ${process.env.DATA_VERSION ?? `unknown`})`,
+					files: [
+						{
+							name: `${data.type} data`,
+							content: prettyPrintObj(data)
+						},
+						{
+							name: `summary`,
+							content: prettyPrintObj(summarizeData(data, arg_pairs.type))
+						},
+						{
+							name: `raw`,
+							content: JSON.stringify(data)
+						}
+					]
+				});
+				logger.verbose("res: %o", res);
 				return {
-					data,
+					glot: {
+						title: res.title,
+						link: `${Glot.res_url}/${res.id}`
+					},
 					others,
 					url
 				};
-			} else {
+			} else { // else return only 'important' info, prettified
 				return {
-					data: tersifyData(data, arg_pairs.type),
+					data: summarizeData(data, arg_pairs.type),
 					others,
 					url
 				};

@@ -4,7 +4,7 @@
   "description": "Discord bot for quickly fetching HWRM data",
   "main": "main.js",
   "scripts": {
-    "build": "npm install && tsc",
+    "build": "npm install && tsc --watch",
     "rebuild": "rm -rf ./node_modules && npm run build",
     "quickstart": "node ./main.js --trace-warnings",
     "qs": "npm run quickstart",

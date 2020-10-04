@@ -36,14 +36,14 @@ export type ArmourType =
 	`SmallMissileArmor` |
 	`ProbeArmor`;
 
-type TerseShip = {
-	name: string,
-	ship_class: ShipClass,
-	hitpoints: number,
-	build_cost: number,
-	build_time: number,
-	armour_type: ArmourType,
-	max_forward_speed: number,
-	max_strafe_speed: number
+export type ShipSummary = {
+	'Name': string,
+	'Class': ShipClass,
+	'Hitpoints': number,
+	'Build Cost': number,
+	'Build Time': number,
+	'Max Forward Speed': number,
+	'Max Strafe Speed': number,
+	'Armour Type': ArmourType,
+	'Linked Weapons': string[]
 };
-export default TerseShip;

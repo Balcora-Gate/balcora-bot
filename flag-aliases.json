@@ -1,13 +1,6 @@
 {
-	"verbose": [
-		"v"
-	],
-	"as_json": [
-		"j",
-		"json"
-	],
-	"raw": [
-		"r"
+	"all": [
+		"a"
 	],
 	"related": [
 		"rel"

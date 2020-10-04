@@ -1,10 +1,13 @@
 export type SubsType = `System` | `Weapon`;
 
-type TerseSubs = {
-	type: SubsType,
-	build_cost: number,
-	build_time: number,
-	regen_time: number,
-	linked_weapon: string
+export type SubsSummary = {
+	'Name': string,
+	'Type': SubsType,
+	'Hitpoints': number,
+	'Build Cost': number,
+	'Build Time': number,
+	'Regen Time': number,
+	'Innate': boolean,
+	'Visible': boolean,
+	'Linked Weapon': string,
 };
-export default TerseSubs;
