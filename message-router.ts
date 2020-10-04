@@ -11,6 +11,8 @@ const isBotCommand = (msg_content: string) => {
 const dispatchCommand = (cmd_type: string, args: { [key: string]: string }, flags: Flags) => {
 	switch (cmd_type.toLowerCase()) {
 		case `info`:
+		case `information`:
+		case `data`:
 			return infoCommand(args, flags);
 		default:
 			return undefined;
