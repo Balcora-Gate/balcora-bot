@@ -45,5 +45,4 @@ export type ShipSummary = {
 	'Max Forward Speed': number,
 	'Max Strafe Speed': number,
 	'Armour Type': ArmourType,
-	'Linked Weapons': string[]
 };

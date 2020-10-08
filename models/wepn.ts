@@ -2,6 +2,10 @@ export type WepnEffect = `Damage`;
 export type WepnTarget = `Self` | `Enemy`;
 export type WepnEffectType = `InstantHit` | `Bullet` | `Missile` | `Mine` | `SphereBurst`;
 export type WepnType = `Fixed` | `Gimble` | `AnimatedTurret`;
+export type WepnUsedBy = {
+	ship: string[] | null,
+	subs: string[] | null
+};
 
 export type WepnSummary = {
 	'Name': string,
@@ -13,7 +17,9 @@ export type WepnSummary = {
 	'Weapon Type': WepnType,
 	'Projectile Speed': number,
 	'Shots/s': number,
-	'Spawn Effect': WepnEffectType
+	'Spawn Effect': WepnEffectType,
+	'Used by Ships': string,
+	'Used by Subs': string
 };
 
 export const calcShotsPerSecond = (wepn_config: { [key: string]: any }): number => {
@@ -27,4 +33,8 @@ export const calcShotsPerSecond = (wepn_config: { [key: string]: any }): number 
 			return ((fire_burst_duration / time_between_shots) / time_between_bursts);
 		}
 	})().toFixed(2));
-}
+};
+
+export const parseUsedByWepn = (used_by: WepnUsedBy[keyof WepnUsedBy]): string => {
+	return used_by?.join(`, `) ?? `<none>`;
+};

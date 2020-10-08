@@ -3,9 +3,9 @@ import { URLSearchParams, URL } from 'url';
 
 import logger from './logger';
 import ModelType from './models/model_types';
-import { WepnSummary, calcShotsPerSecond } from './models/wepn';
+import { WepnSummary, calcShotsPerSecond, parseUsedByWepn, WepnUsedBy } from './models/wepn';
 import { ShipSummary } from './models/ship';
-import { SubsSummary, SubsType } from './models/subs';
+import { parseUsedBySubs, SubsSummary, SubsType, SubsUsedBy } from './models/subs';
 
 import * as Glot from './glot-io';
 import { prettyPrintObj } from './formatting';
@@ -34,7 +34,7 @@ const cleanVal = (val: string | number | undefined) => {
 };
 
 const summarizeWepnData = (data: {[key: string]: any}): WepnSummary => {
-	const pretty_wepn = {
+	const wepn_summary: {[key in keyof WepnSummary]: string | number | undefined} = {
 		'Name': data.name,
 		'Effect': data.result.effect,
 		'Target': data.result.target,
@@ -44,12 +44,14 @@ const summarizeWepnData = (data: {[key: string]: any}): WepnSummary => {
 		'Weapon Type': data.config.type,
 		'Projectile Speed': data.config.projectile_speed,
 		'Shots/s': calcShotsPerSecond(data.config),
-		'Spawn Effect': data.result.spawned_weapon_effect
+		'Spawn Effect': data.result.spawned_weapon_effect,
+		'Used by Ships': parseUsedByWepn((data.used_by as WepnUsedBy).ship),
+		'Used by Subs': parseUsedByWepn((data.used_by as WepnUsedBy).subs),
 	};
-	for (const [k, v] of Object.entries(pretty_wepn)) {
-		pretty_wepn[k as keyof WepnSummary] = cleanVal(v);
+	for (const [k, v] of Object.entries(wepn_summary)) {
+		wepn_summary[k as keyof typeof wepn_summary] = cleanVal(v);
 	}
-	return pretty_wepn;
+	return wepn_summary as WepnSummary;
 };
 
 const summarizeShipData = (data: {[key: string]: any}): ShipSummary => {
@@ -61,8 +63,7 @@ const summarizeShipData = (data: {[key: string]: any}): ShipSummary => {
 		'Build Time': data.attribs.buildTime,
 		'Max Forward Speed': data.attribs.mainEngineMaxSpeed,
 		'Max Strafe Speed': data.attribs.thrusterMaxSpeed,
-		'Armour Type': data.attribs.ArmourFamily,
-		'Linked Weapons': [],
+		'Armour Type': data.attribs.ArmourFamily
 	};
 	for (const [k, v] of Object.entries(pretty_ship)) {
 		pretty_ship[k as keyof ShipSummary] = cleanVal(v);
@@ -71,7 +72,7 @@ const summarizeShipData = (data: {[key: string]: any}): ShipSummary => {
 };
 
 const summarizeSubsData = (data: {[key: string]: any}): SubsSummary => {
-	const pretty_subs = {
+	const subs_summary = {
 		'Name': data.name,
 		'Type': (data.weapon === null ? `System` : `Weapon`) as SubsType,
 		'Hitpoints': data.attribs.maxhealth,
@@ -80,12 +81,13 @@ const summarizeSubsData = (data: {[key: string]: any}): SubsSummary => {
 		'Build Time': data.attribs.timeToBuild,
 		'Innate': data.attribs.innate || false,
 		'Visible': data.attribs.visible || false,
-		'Linked Weapon': data.weapon
+		'Linked Weapon': data.weapon,
+		'Used by Ships': parseUsedBySubs((data.used_by as SubsUsedBy).ship)
 	};
-	for (const [k, v] of Object.entries(pretty_subs)) {
-		pretty_subs[k as keyof SubsSummary] = cleanVal(v);
+	for (const [k, v] of Object.entries(subs_summary)) {
+		subs_summary[k as keyof SubsSummary] = cleanVal(v);
 	}
-	return pretty_subs;
+	return subs_summary;
 };
 
 const summarizeData = (data: {[key: string]: any}, type: ModelType): WepnSummary | ShipSummary | SubsSummary => {
@@ -119,6 +121,7 @@ export default async (arg_pairs: { type: ModelType, name: string }, flags: Flags
 			return 0;
 		});
 		if (data) {
+			logger.verbose(`Got data...`);
 			delete data._id;
 			if (flags.all) {
 				const res = await Glot.create({
@@ -156,7 +159,7 @@ export default async (arg_pairs: { type: ModelType, name: string }, flags: Flags
 			}	
 		}
 	} catch (err) {
-		logger.error(err);
+		console.error(err);
 		console.trace();
 	}
 	return {};
