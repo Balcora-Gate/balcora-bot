@@ -1,6 +1,6 @@
 # info
 
-Fetches entity information from Balcora. Information is summarized by default. If the `--all` flag is set, a [glot.io](https://glot.io/) paste is made with more verbose information in addition to summary and raw json data. A 2.3 version number is always included.
+Fetches entity (ship, weapon, subsystem) information from Balcora. Information is summarized by default. If the `--all` flag is set, a [glot.io](https://glot.io/) paste is made with more verbose information in addition to summary and raw json data. A 2.3 version number is always included.
 
 Possible args:
 

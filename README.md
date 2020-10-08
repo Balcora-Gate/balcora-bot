@@ -44,4 +44,4 @@ Examples:
 
 BB currently only has one command:
 
-- [info](./docs/info.md)
+- [info](./docs/info.md): Fetches entity (ship, weapon, subsystem) information from Balcora.
