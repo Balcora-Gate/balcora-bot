@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 dotenv.config();
-import Discord, { Message, MessageEmbed, NewsChannel, TextChannel } from 'discord.js';
+import Discord, { Message, NewsChannel, TextChannel } from 'discord.js';
 
 import logger from './logger';
 import messageRouter from './message-router';
