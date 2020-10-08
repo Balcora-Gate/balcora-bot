@@ -16,5 +16,5 @@ export const create = async (params: CreateParams) => {
 		method: `POST`,
 		body: JSON.stringify(params),
 		headers: { 'Content-Type': `application/json` }
-	})).json()
+	})).json();
 };	

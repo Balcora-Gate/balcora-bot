@@ -1,7 +1,7 @@
 // import { stringify } from "querystring";
 
 export const prettyPrintObj = (obj: {[key: string]: any}): string => {
-	const _prettify = (o: {[key: string]: any}, indent_lvl: number = 0): string => {
+	const _prettify = (o: {[key: string]: any}, indent_lvl = 0): string => {
 		return Object.entries(o).reduce((acc, [k, v]) => {
 			if (typeof v === `undefined` || v === null || v === undefined) {
 				v = `<none>`;
@@ -22,5 +22,5 @@ export const prettyPrintObj = (obj: {[key: string]: any}): string => {
 
 export const toCodeBlock = (str: string) => {
 	const cb_delim = '```';
-	return `${cb_delim}\n${str}\n${cb_delim}`
-}
+	return `${cb_delim}yaml\n${str}\n${cb_delim}`;
+};

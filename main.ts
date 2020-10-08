@@ -20,14 +20,15 @@ client.on(`message`, async (msg: Message) => {
 			default:
 				return `${msg.guild?.name}::${(chan as TextChannel | NewsChannel).name}`;
 		}
-	}
+	};
 	logger.info(`[${resolveOriginName(msg)}] ${msg.author.username}: ${msg.content.length} chars`);
+	if (process.env.DM_ONLY! && msg.channel.type !== `dm`) {
+		return;
+	}
 	const response = await messageRouter(msg);
 	logger.verbose(`type: ${typeof response}`);
 	if (response) {
 		const msg_target = msg.channel.type === `dm` ? msg.author : msg.channel;
-		// need to check if >2000 chars since disco api won't accept more than that
-		// in this case we send it to hastebin and return a 60-min link
 		msg_target.send(response);
 	}
 });

@@ -6,7 +6,7 @@
   "scripts": {
     "build": "npm install && tsc --watch",
     "rebuild": "rm -rf ./node_modules && npm run build",
-    "quickstart": "node ./main.js --trace-warnings",
+    "quickstart": "node ./main.js",
     "qs": "npm run quickstart",
     "start": "npm run build && npm run quickstart"
   },
