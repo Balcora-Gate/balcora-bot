@@ -1,16 +1,15 @@
-import { MessageEmbed } from "discord.js";
-import fetchInfo from "./fetch-info";
-import { toCodeBlock, prettyPrintObj } from "./formatting";
-import ModelType from "./models/model_types";
-import { Flags } from "./parsing";
+import { makeBalcoraEmbed } from "../discord-util";
+import fetchInfo from "../fetch-info";
+import { toCodeBlock, prettyPrintObj } from "../formatting";
+import ModelType from "../models/model_types";
+import { Flags } from "../parsing";
 
 export default async (args: { type?: string, name?: string }, flags: Flags) => {
 	if (!args.type || !args.name) {
 		return undefined;
 	}
 	const {data, others, url, glot } = await fetchInfo({ type: args.type as ModelType, name: args.name }, flags);
-	const embed = new MessageEmbed()
-		.setColor(`#e0683b`)
+	const embed = makeBalcoraEmbed()
 		.addField(`2.3 ver:`, process.env.DATA_VERSION, false);
 	if (url) {
 		const balcora_gate_url = `${process.env.BALCORA_REF_LINK!}?name=${args.name}&type=${args.type}`;

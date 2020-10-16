@@ -1,11 +1,16 @@
 {
 	"type": [
 		"t",
-		"c",
 		"cat",
 		"category"
 	],
 	"name": [
 		"n"
+	],
+	"command": [
+		"c",
+		"com",
+		"comm",
+		"cmd"
 	]
 }

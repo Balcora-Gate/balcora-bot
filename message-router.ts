@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 import logger from './logger';
-import infoCommand from './info-command';
+import Commands from './command';
 import { Flags, parseInputArgs, parseInputFlags } from './parsing';
 
 const isBotCommand = (msg_content: string) => {
@@ -9,14 +9,14 @@ const isBotCommand = (msg_content: string) => {
 };
 
 const dispatchCommand = (cmd_type: string, args: { [key: string]: string }, flags: Flags) => {
-	switch (cmd_type.toLowerCase()) {
-		case `info`:
-		case `information`:
-		case `data`:
-			return infoCommand(args, flags);
-		default:
-			return undefined;
+	cmd_type = cmd_type.toLowerCase();
+	const isObjKey = <T>(key: any, obj: T): key is keyof T => key in obj;
+	if (isObjKey(cmd_type, Commands)) {
+		logger.verbose(`With args: %o`, args);
+		logger.verbose(`With flags: %o`, flags);
+		return Commands[cmd_type](args, flags);
 	}
+	return undefined;
 };
 
 export default async (msg: Message) => {
