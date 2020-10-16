@@ -17,7 +17,7 @@ export default async (args: { command?: keyof typeof Commands }): Promise<Messag
 		logger.verbose(`obj: %o`, Commands);
 		return embed
 			.setTitle(`Help`)
-			.setURL(`https://github.com/Balcora-Gate/balcora-bot/blob/master/README.md`)
+			.setURL(`https://github.com/Balcora-Gate/balcora-bot/blob/master/README.md#balcora-bot`)
 			.setDescription(`Use \`bb help <command>\` for more detailed information about that command.`)
 			.addFields([
 				{
@@ -26,7 +26,7 @@ export default async (args: { command?: keyof typeof Commands }): Promise<Messag
 				}
 			]);
 	} else {
-		const docs_url = `https://github.com/Balcora-Gate/balcora-bot/blob/master/docs/${args.command}`;
+		const docs_url = `https://github.com/Balcora-Gate/balcora-bot/blob/master/docs/${args.command}.md#${args.command}`;
 		const contents = (await readFile(`./docs/${args.command}.md`, `utf-8`));
 		// logger.verbose(`contents: %o`, contents);
 		const summary = contents.match(/# \w+[\n\r]*?([^\n]+)[\n\r]*?##/)?.[1];
