@@ -6,7 +6,7 @@ Tells the user all available BB commands, or use the `-command <command-name>` a
 
 | Arg      | Aliases | Description                                    |
 |----------|---------|------------------------------------------------|
-| -command | -c      | The command to get detailed information about. |
+| `-command` | `-c`, `-com`, `-comm`, `-cmd` | The command to get detailed information about. |
 
 ## Possible Flags:
 
@@ -20,7 +20,7 @@ bb help -c info
 
 The above command will return detailed information about the `bb info` command.
 
-Remember you can use:
+**Remember you can use:**
 
 ```
 bb help
