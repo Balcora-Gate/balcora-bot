@@ -42,6 +42,5 @@ Examples:
 
 ## Commands
 
-BB currently only has one command:
-
-- [info](./docs/info.md): Fetches entity (ship, weapon, subsystem) information from Balcora.
+See all of BB's commands [here](https://github.com/Balcora-Gate/balcora-bot/tree/master/docs).
+Or, use the `bb help` command in chat.
