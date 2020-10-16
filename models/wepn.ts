@@ -12,6 +12,7 @@ export type WepnSummary = {
 	'Effect': WepnEffect,
 	'Target': WepnTarget,
 	'Effect Type': WepnEffect,
+	'Range': number,
 	'Min Effect': number,
 	'Max Effect': number,
 	'Weapon Type': WepnType,

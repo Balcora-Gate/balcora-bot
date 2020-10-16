@@ -39,6 +39,7 @@ const summarizeWepnData = (data: {[key: string]: any}): WepnSummary => {
 		'Effect': data.result.effect,
 		'Target': data.result.target,
 		'Effect Type': data.config.fire_type,
+		'Range': data.config.fire_range,
 		'Min Effect': data.result.min_effect_val,
 		'Max Effect': data.result.max_effect_val,
 		'Weapon Type': data.config.type,
