@@ -1,0 +1,32 @@
+{
+	"help": {
+		"args": {
+			"command": [
+				"c",
+				"com",
+				"comm",
+				"cmd"
+			]
+		}
+	},
+	"info": {
+		"args": {
+			"type": [
+				"t",
+				"cat",
+				"category"
+			],
+			"name" : [
+				"n"
+			]
+		},
+		"flags": {
+			"all": [
+				"a"
+			],
+			"related": [
+				"rel"
+			]
+		}
+	}
+}

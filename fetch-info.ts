@@ -9,7 +9,7 @@ import { parseUsedBySubs, SubsSummary, SubsType, SubsUsedBy } from './models/sub
 
 import * as Glot from './glot-io';
 import { prettyPrintObj } from './formatting';
-import { Flags } from './parsing';
+import { InfoFlags } from './commands/info';
 
 const cleanVal = (val: string | number | undefined) => {
 	if (typeof val === `string`) {
@@ -104,7 +104,7 @@ const summarizeData = (data: {[key: string]: any}, type: ModelType): WepnSummary
 	}
 };
 
-export default async (arg_pairs: { type: ModelType, name: string }, flags: Flags) => {
+export default async (arg_pairs: { type: ModelType, name: string }, flags: string[]) => {
 	try {
 		const url = new URL(process.env.API_LINK!);
 		const params = new URLSearchParams();
@@ -124,7 +124,7 @@ export default async (arg_pairs: { type: ModelType, name: string }, flags: Flags
 		if (data) {
 			logger.verbose(`Got data...`);
 			delete data._id;
-			if (flags.all) {
+			if (flags.includes(InfoFlags.ALL)) {
 				const res = await Glot.create({
 					title: `${data.name} (ver ${process.env.DATA_VERSION ?? `unknown`})`,
 					files: [
