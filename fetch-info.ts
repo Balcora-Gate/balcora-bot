@@ -33,8 +33,8 @@ const cleanVal = (val: string | number | undefined) => {
 	return val;
 };
 
-const summarizeWepnData = (data: {[key: string]: any}): WepnSummary => {
-	const wepn_summary: {[key in keyof WepnSummary]: string | number | undefined} = {
+const summarizeWepnData = (data: { [key: string]: any }): WepnSummary => {
+	const wepn_summary: { [key in keyof WepnSummary]: string | number | undefined } = {
 		'Name': data.name,
 		'Effect': data.result.effect,
 		'Target': data.result.target,
@@ -55,7 +55,7 @@ const summarizeWepnData = (data: {[key: string]: any}): WepnSummary => {
 	return wepn_summary as WepnSummary;
 };
 
-const summarizeShipData = (data: {[key: string]: any}): ShipSummary => {
+const summarizeShipData = (data: { [key: string]: any }): ShipSummary => {
 	const pretty_ship = {
 		'Name': data.name,
 		'Class': data.attribs.DisplayFamily,
@@ -72,7 +72,7 @@ const summarizeShipData = (data: {[key: string]: any}): ShipSummary => {
 	return pretty_ship;
 };
 
-const summarizeSubsData = (data: {[key: string]: any}): SubsSummary => {
+const summarizeSubsData = (data: { [key: string]: any }): SubsSummary => {
 	const subs_summary = {
 		'Name': data.name,
 		'Type': (data.weapon === null ? `System` : `Weapon`) as SubsType,
@@ -91,7 +91,7 @@ const summarizeSubsData = (data: {[key: string]: any}): SubsSummary => {
 	return subs_summary;
 };
 
-const summarizeData = (data: {[key: string]: any}, type: ModelType): WepnSummary | ShipSummary | SubsSummary => {
+const summarizeData = (data: { [key: string]: any }, type: ModelType): WepnSummary | ShipSummary | SubsSummary => {
 	switch (type) {
 		case 'ship':
 			return summarizeShipData(data);
@@ -113,7 +113,7 @@ export default async (arg_pairs: { type: ModelType, name: string }, flags: strin
 		url.search = params.toString();
 		logger.verbose(`Fetching!: ${url.href}`);
 		const res = await fetch(url);
-		const [data, ...others]: {[key: string]: any}[] = (await res.json()).sort((a: any, b: any) => {
+		const [data, ...others]: { [key: string]: any }[] = (await res.json()).sort((a: any, b: any) => {
 			if (a.name < b.name) {
 				return -1;
 			} else if (a.name > b.name) {
@@ -140,7 +140,9 @@ export default async (arg_pairs: { type: ModelType, name: string }, flags: strin
 							name: `raw`,
 							content: JSON.stringify(data)
 						}
-					]
+					],
+					language: `plaintext`,
+					public: true
 				});
 				logger.verbose("res: %o", res);
 				return {
@@ -157,7 +159,7 @@ export default async (arg_pairs: { type: ModelType, name: string }, flags: strin
 					others,
 					url
 				};
-			}	
+			}
 		}
 	} catch (err) {
 		console.error(err);
