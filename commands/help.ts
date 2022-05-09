@@ -25,11 +25,15 @@ export default class HelpCommand extends Command {
 			return embed
 				.setTitle(`Help`)
 				.setURL(`https://github.com/Balcora-Gate/balcora-bot/blob/master/README.md#balcora-bot`)
-				.setDescription(`Use \`bb help <command>\` for more detailed information about that command.`)
+				.setDescription(`Use \`bb help -c <command>\` for detailed information about a command.`)
 				.addFields([
 					{
 						name: `Possible commands:`,
 						value: toCodeBlock(possible_command_str)
+					},
+					{
+						name: `Example:`,
+						value: `\`bb help -c info\``
 					}
 				]);
 		} else {

@@ -24,7 +24,7 @@ export default class Info extends Command {
 		const embed = makeBalcoraEmbed();
 		if (url) {
 			const balcora_gate_url = `${process.env.BALCORA_REF_LINK!}?name=${args.name}&type=${args.type}`;
-	
+
 			// hacky, pls refactor
 			const and_others_str = others?.length && others.length > 5 ? `... and **${others.length - 5}** others.` : ``;
 			const top_5_others_str = others?.slice(0, 5).reduce((acc, entity) => {
@@ -32,7 +32,7 @@ export default class Info extends Command {
 				else return `\`${entity.name}\``;
 			}, ``);
 			const also_found_str = others?.length ? `⚠️ Also indexed: ${top_5_others_str}${and_others_str}` : ``;
-	
+
 			const balcora_link = `On balcora: ${balcora_gate_url}`;
 			const direct_api_link = `API: ${url.href}`;
 			if (glot) {

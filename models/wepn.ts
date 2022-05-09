@@ -11,22 +11,22 @@ export type WepnSummary = {
 	'Name': string,
 	'Effect': WepnEffect,
 	'Target': WepnTarget,
-	'Effect Type': WepnEffect,
+	'Effect Type': WepnEffectType,
 	'Range': number,
 	'Min Effect': number,
 	'Max Effect': number,
 	'Weapon Type': WepnType,
 	'Projectile Speed': number,
 	'Shots/s': number,
-	'Spawn Effect': WepnEffectType,
+	'Spawn Effect': string,
 	'Used by Ships': string,
 	'Used by Subs': string
 };
 
-export const calcShotsPerSecond = (wepn_config: { [key: string]: any }): number => {
-	const fire_burst_duration = parseFloat(wepn_config.fire_burst_duration);
-	const time_between_shots = parseFloat(wepn_config.time_between_shots);
-	const time_between_bursts = parseFloat(wepn_config.time_between_bursts);
+export const calcShotsPerSecond = (wepn_config: { [key: string]: unknown }): number => {
+	const fire_burst_duration = parseFloat(wepn_config.fire_burst_duration as string);
+	const time_between_shots = parseFloat(wepn_config.time_between_shots as string);
+	const time_between_bursts = parseFloat(wepn_config.time_between_bursts as string);
 	return parseFloat((() => {
 		if (fire_burst_duration === 0) {
 			return (1 / time_between_shots);

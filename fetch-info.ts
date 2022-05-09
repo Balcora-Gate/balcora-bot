@@ -3,15 +3,15 @@ import { URLSearchParams, URL } from 'url';
 
 import logger from './logger';
 import ModelType from './models/model_types';
-import { WepnSummary, calcShotsPerSecond, parseUsedByWepn, WepnUsedBy } from './models/wepn';
-import { ShipSummary } from './models/ship';
-import { parseUsedBySubs, SubsSummary, SubsType, SubsUsedBy } from './models/subs';
+import { WepnSummary, calcShotsPerSecond, parseUsedByWepn, WepnUsedBy, WepnTarget, WepnEffect, WepnEffectType, WepnType } from './models/wepn';
+import { ArmourType, ShipClass, ShipSummary } from './models/ship';
+import { parseUsedBySubs, SubsSummary, SubsUsedBy } from './models/subs';
 
 import * as Glot from './glot-io';
 import { prettyPrintObj } from './formatting';
 import { InfoFlags } from './commands/info';
 
-const cleanVal = (val: string | number | undefined) => {
+const cleanVal = (val: string | number | boolean | undefined) => {
 	if (typeof val === `string`) {
 		// double/single quotes
 		const pattern = /["']/gm;
@@ -33,87 +33,121 @@ const cleanVal = (val: string | number | undefined) => {
 	return val;
 };
 
-const summarizeWepnData = (data: { [key: string]: any }): WepnSummary => {
-	const wepn_summary: { [key in keyof WepnSummary]: string | number | undefined } = {
+type MiscData = { [key: string]: unknown };
+export interface APIData {
+	_id: string,
+	name: string,
+	category: string
+}
+
+export interface APIWepnData extends APIData {
+	result: MiscData,
+	config: MiscData,
+	used_by: WepnUsedBy,
+	penetration: { [key: string]: number } & {
+		default_damage_mult: number
+	},
+	accuracy: { [key: string]: number } & {
+		default_acc_mult: number
+	}
+}
+const summarizeWepnData = (data: APIWepnData): WepnSummary => {
+	const wepn_summary: Record<keyof WepnSummary, WepnSummary[keyof WepnSummary]> = {
 		'Name': data.name,
-		'Effect': data.result.effect,
-		'Target': data.result.target,
-		'Effect Type': data.config.fire_type,
-		'Range': data.config.fire_range,
-		'Min Effect': data.result.min_effect_val,
-		'Max Effect': data.result.max_effect_val,
-		'Weapon Type': data.config.type,
-		'Projectile Speed': data.config.projectile_speed,
-		'Shots/s': calcShotsPerSecond(data.config),
-		'Spawn Effect': data.result.spawned_weapon_effect,
-		'Used by Ships': parseUsedByWepn((data.used_by as WepnUsedBy).ship),
-		'Used by Subs': parseUsedByWepn((data.used_by as WepnUsedBy).subs),
+		'Effect': data.result.effect as WepnEffect,
+		'Target': data.result.target as WepnTarget,
+		'Effect Type': data.config.fire_type as WepnEffectType,
+		'Range': data.config.fire_range as number,
+		'Min Effect': data.result.min_effect_val as number,
+		'Max Effect': data.result.max_effect_val as number,
+		'Weapon Type': data.config.type as WepnType,
+		'Projectile Speed': data.config.projectile_speed as number,
+		'Shots/s': calcShotsPerSecond(data.config) as number,
+		'Spawn Effect': data.result.spawned_weapon_effect as string,
+		'Used by Ships': parseUsedByWepn(data.used_by.ship),
+		'Used by Subs': parseUsedByWepn(data.used_by.subs),
 	};
 	for (const [k, v] of Object.entries(wepn_summary)) {
-		wepn_summary[k as keyof typeof wepn_summary] = cleanVal(v);
+		wepn_summary[k as keyof typeof wepn_summary] = cleanVal(v) as (string | number);
 	}
 	return wepn_summary as WepnSummary;
 };
 
-const summarizeShipData = (data: { [key: string]: any }): ShipSummary => {
-	const pretty_ship = {
+export interface APIShipData extends APIData {
+	attribs: MiscData & {
+		ArmourFamily: string,
+		AttackFamily: string
+	},
+	abilites: { [key: string]: string },
+	emp: {
+		HP: number,
+		regen_time: number
+	}
+}
+const summarizeShipData = (data: APIShipData): ShipSummary => {
+	const pretty_ship: Record<keyof ShipSummary, ShipSummary[keyof ShipSummary]> = {
 		'Name': data.name,
-		'Class': data.attribs.DisplayFamily,
-		'Hitpoints': data.attribs.maxhealth,
-		'Build Cost': data.attribs.buildCost,
-		'Build Time': data.attribs.buildTime,
-		'Max Forward Speed': data.attribs.mainEngineMaxSpeed,
-		'Max Strafe Speed': data.attribs.thrusterMaxSpeed,
-		'Armour Type': data.attribs.ArmourFamily
+		'Class': data.attribs.DisplayFamily as ShipClass,
+		'Hitpoints': data.attribs.maxhealth as number,
+		'Build Cost': data.attribs.buildCost as number,
+		'Build Time': data.attribs.buildTime as number,
+		'Max Forward Speed': data.attribs.mainEngineMaxSpeed as number,
+		'Max Strafe Speed': data.attribs.thrusterMaxSpeed as number,
+		'Armour Type': data.attribs.ArmourFamily as ArmourType
 	};
 	for (const [k, v] of Object.entries(pretty_ship)) {
-		pretty_ship[k as keyof ShipSummary] = cleanVal(v);
+		pretty_ship[k as keyof typeof pretty_ship] = cleanVal(v) as (string | number);
 	}
-	return pretty_ship;
+	return pretty_ship as ShipSummary;
 };
 
-const summarizeSubsData = (data: { [key: string]: any }): SubsSummary => {
-	const subs_summary = {
+export interface APISubsData extends APIData {
+	attribs: MiscData,
+	weapon: null | unknown,
+	used_by: SubsUsedBy
+}
+const summarizeSubsData = (data: APISubsData): SubsSummary => {
+	const subs_summary: Record<keyof SubsSummary, SubsSummary[keyof SubsSummary]> = {
 		'Name': data.name,
-		'Type': (data.weapon === null ? `System` : `Weapon`) as SubsType,
-		'Hitpoints': data.attribs.maxhealth,
-		'Regen Time': data.attribs.regentime,
-		'Build Cost': data.attribs.costToBuild,
-		'Build Time': data.attribs.timeToBuild,
-		'Innate': data.attribs.innate || false,
-		'Visible': data.attribs.visible || false,
-		'Linked Weapon': data.weapon,
-		'Used by Ships': parseUsedBySubs((data.used_by as SubsUsedBy).ship)
+		'Type': data.weapon === null ? `System` : `Weapon`,
+		'Hitpoints': data.attribs.maxhealth as number,
+		'Regen Time': data.attribs.regentime as number,
+		'Build Cost': data.attribs.costToBuild as number,
+		'Build Time': data.attribs.timeToBuild as number,
+		'Innate': (data.attribs.innate || false) as boolean,
+		'Visible': (data.attribs.visible || false) as boolean,
+		'Linked Weapon': data.weapon as string,
+		'Used by Ships': parseUsedBySubs(data.used_by.ship)
 	};
 	for (const [k, v] of Object.entries(subs_summary)) {
-		subs_summary[k as keyof SubsSummary] = cleanVal(v);
+		subs_summary[k as keyof typeof subs_summary] = cleanVal(v);
 	}
-	return subs_summary;
+	return subs_summary as SubsSummary;
 };
 
-const summarizeData = (data: { [key: string]: any }, type: ModelType): WepnSummary | ShipSummary | SubsSummary => {
+const summarizeData = (data: Omit<APIData, "_id">, type: ModelType): WepnSummary | ShipSummary | SubsSummary => {
 	switch (type) {
 		case 'ship':
-			return summarizeShipData(data);
+			return summarizeShipData(data as APIShipData);
 		case 'wepn':
-			return summarizeWepnData(data);
+			return summarizeWepnData(data as APIWepnData);
 		case 'subs':
-			return summarizeSubsData(data);
+			return summarizeSubsData(data as APISubsData);
 		case `unknown`:
-			return summarizeWepnData(data);
+			return summarizeWepnData(data as APIWepnData);
 	}
 };
 
 export default async (arg_pairs: { type: ModelType, name: string }, flags: string[]) => {
+	const url = new URL(process.env.API_LINK!);
+	const params = new URLSearchParams();
+	params.append(`type`, arg_pairs.type);
+	params.append(`name`, arg_pairs.name);
+	url.search = params.toString();
 	try {
-		const url = new URL(process.env.API_LINK!);
-		const params = new URLSearchParams();
-		params.append(`type`, arg_pairs.type);
-		params.append(`name`, arg_pairs.name);
-		url.search = params.toString();
 		logger.verbose(`Fetching!: ${url.href}`);
 		const res = await fetch(url);
-		const [data, ...others]: { [key: string]: any }[] = (await res.json()).sort((a: any, b: any) => {
+		const [data, ...others] = (await res.json() as APIData[]).sort((a, b) => {
 			if (a.name < b.name) {
 				return -1;
 			} else if (a.name > b.name) {
@@ -123,22 +157,27 @@ export default async (arg_pairs: { type: ModelType, name: string }, flags: strin
 		});
 		if (data) {
 			logger.verbose(`Got data...`);
-			delete data._id;
+			const _data = (() => {
+				const _: Partial<typeof data> = { ...data };
+				delete _._id;
+				return _ as Omit<typeof data, "_id">;
+			})();
+
 			if (flags.includes(InfoFlags.ALL)) {
 				const res = await Glot.create({
-					title: `${data.name} (ver ${process.env.DATA_VERSION ?? `unknown`})`,
+					title: `${_data.name} (ver ${process.env.DATA_VERSION ?? `unknown`})`,
 					files: [
 						{
-							name: `${data.type} data`,
-							content: prettyPrintObj(data)
+							name: `${arg_pairs.type} data`,
+							content: prettyPrintObj(_data)
 						},
 						{
 							name: `summary`,
-							content: prettyPrintObj(summarizeData(data, arg_pairs.type))
+							content: prettyPrintObj(summarizeData(_data, arg_pairs.type))
 						},
 						{
 							name: `raw`,
-							content: JSON.stringify(data)
+							content: JSON.stringify(_data)
 						}
 					],
 					language: `plaintext`,
@@ -151,13 +190,15 @@ export default async (arg_pairs: { type: ModelType, name: string }, flags: strin
 						link: `${Glot.res_url}/${res.id}`
 					},
 					others,
-					url
+					url,
+					raw: data
 				};
 			} else { // else return only 'important' info, prettified
 				return {
 					data: summarizeData(data, arg_pairs.type),
 					others,
-					url
+					url,
+					raw: data
 				};
 			}
 		}
@@ -165,5 +206,7 @@ export default async (arg_pairs: { type: ModelType, name: string }, flags: strin
 		console.error(err);
 		console.trace();
 	}
-	return {};
+	return {
+		url
+	};
 };

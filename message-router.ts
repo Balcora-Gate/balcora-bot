@@ -9,7 +9,7 @@ const isBotCommand = (msg_content: string) => {
 
 const dispatchCommand = (cmd_type: string, command_parts: string[]) => {
 	cmd_type = cmd_type.toLowerCase();
-	const isObjKey = <T>(key: any, obj: T): key is keyof T => key in obj;
+	const isObjKey = <T>(key: unknown, obj: T): key is keyof T => (key as keyof T) in obj;
 	if (isObjKey(cmd_type, Commands)) {
 		return Commands[cmd_type].execute(command_parts);
 	}
@@ -22,7 +22,7 @@ export default async (msg: Message) => {
 	logger.verbose(`msg: ${msg.content}`);
 
 	if (isBotCommand(content)) {
-		const [ type, ...payload ] = [...content.matchAll(/^bb\s+(.+)/gm)][0][1].split(/\s+/gm); // split into cmd type | payload
+		const [type, ...payload] = [...content.matchAll(/^bb\s+(.+)/gm)][0][1].split(/\s+/gm); // split into cmd type | payload
 		logger.verbose(type);
 		logger.verbose(payload);
 

@@ -16,7 +16,7 @@
 				"cat",
 				"category"
 			],
-			"name" : [
+			"name": [
 				"n"
 			]
 		},
@@ -26,6 +26,23 @@
 			],
 			"related": [
 				"rel"
+			]
+		}
+	},
+	"dps": {
+		"args": {
+			"source": [
+				"s",
+				"src"
+			],
+			"target": [
+				"t",
+				"targ"
+			]
+		},
+		"flags": {
+			"verbose": [
+				"v"
 			]
 		}
 	}

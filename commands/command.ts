@@ -3,7 +3,7 @@ import logger from "../logger";
 import { CommandParamList } from "../params";
 import { paramResolver } from "../parsing";
 
-export type CommandCallback = (args: CommandParamList, flags: CommandParamList) => Promise<any>;
+export type CommandCallback = (args: CommandParamList, flags: CommandParamList) => Promise<unknown>;
 
 export interface PossibleParams {
 	readonly possible_args: CommandParamList;
@@ -18,13 +18,17 @@ export type ResolvedParams = {
 };
 
 export default abstract class Command implements PossibleParams {
-	private readonly param_resolver = paramResolver(this.name);
 
 	constructor(
 		readonly name: CommandType,
 		readonly possible_args: CommandParamList,
 		readonly possible_flags: CommandParamList
-	) {}
+	) {
+		this.param_resolver = paramResolver(this.name);
+		logger.verbose(`resolver OK: ${this.param_resolver} (${this.name})`);
+	}
+
+	private readonly param_resolver;
 
 	get possible_params() {
 		return {
@@ -33,7 +37,7 @@ export default abstract class Command implements PossibleParams {
 		};
 	}
 
-	abstract execute(command_parts: string[]): Promise<any>;
+	abstract execute(command_parts: string[]): Promise<unknown>;
 
 	resolveParamAliases(command_parts: string[]): ResolvedParams {
 		logger.verbose(`got parts: %o`, command_parts);
